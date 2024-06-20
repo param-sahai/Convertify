@@ -25,6 +25,7 @@ const App = () => {
 
       FileDownload(response.data, `converted_data.${format}`);
     } catch (error) {
+      alert("Kindly check the JSON format and try again!")
       console.error('Error converting data:', error);
     }
   };

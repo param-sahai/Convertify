@@ -16,6 +16,7 @@
     "express": "^4.19.2",
     "js-yaml": "^4.1.0",
     "json2csv": "^6.0.0-alpha.2",
+    "jstoxml": "^5.0.1",
     "pdfkit": "^0.15.0",
     "xml2js": "^0.6.2"
   }

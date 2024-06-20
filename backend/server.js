@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { Parser } = require('json2csv');
-const { js2xml } = require('xml2js');
+const { toXML } = require('jstoxml');
 const yaml = require('js-yaml');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
@@ -20,10 +20,12 @@ app.post('/convert', async (req, res) => {
   try {
     jsonData = JSON.parse(data);
   } catch (error) {
+    alert("Kindly check the JSON format and try again!")
     return res.status(400).send('Invalid JSON data');
   }
 
   let result;
+  console.log('format:', format);
   switch (format) {
     case 'csv':
       try {
@@ -38,7 +40,9 @@ app.post('/convert', async (req, res) => {
 
     case 'xml':
       try {
-        result = js2xml(jsonData, { compact: true, ignoreComment: true, spaces: 4 });
+        result = toXML(jsonData, {
+          indent: '    '
+      });
         res.header('Content-Type', 'application/xml');
         res.attachment('data.xml');
       } catch (error) {
