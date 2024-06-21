@@ -60,6 +60,7 @@ const App = () => {
           <MenuItem value="yaml">YAML</MenuItem>
           <MenuItem value="pdf">PDF</MenuItem>
           <MenuItem value="xlsx">Excel</MenuItem>
+          <MenuItem value="png">PNG</MenuItem>
         </TextField>
         <Button variant="contained" color="primary" type="submit" fullWidth>
           Convert

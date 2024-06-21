@@ -5,7 +5,9 @@ const { toXML } = require('jstoxml');
 const yaml = require('js-yaml');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
-const cors = require('cors'); // Import cors
+const { createCanvas, loadImage, registerFont } = require('canvas');
+const axios = require('axios');
+const cors = require('cors'); 
 
 const app = express();
 const PORT = 5000;
@@ -20,12 +22,10 @@ app.post('/convert', async (req, res) => {
   try {
     jsonData = JSON.parse(data);
   } catch (error) {
-    alert("Kindly check the JSON format and try again!")
     return res.status(400).send('Invalid JSON data');
   }
 
   let result;
-  console.log('format:', format);
   switch (format) {
     case 'csv':
       try {
@@ -88,6 +88,46 @@ app.post('/convert', async (req, res) => {
       }
       return;
 
+/**
+ *
+ * 
+ * 
+ *Under Process
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+    case 'png':
+        try {
+          // Create a canvas instance
+          const canvas = createCanvas(800, 600);
+          const ctx = canvas.getContext('2d');
+  
+          // Example drawing: Render JSON data as text on the canvas
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#000000';
+          ctx.font = '20px Arial';
+          ctx.fillText(JSON.stringify(jsonData, null, 2), 50, 50);
+  
+          // Convert canvas to PNG buffer
+          const buffer = canvas.toBuffer('image/png');
+  
+          // Send PNG buffer as response
+          res.header('Content-Type', 'image/png');
+          res.attachment('data.png');
+          res.send(buffer);
+        } catch (error) {
+          console.error('Error converting to PNG:', error);
+          return res.status(500).send('Error converting to PNG');
+        }
+        break;
+    
     default:
       return res.status(400).send('Invalid format');
   }
