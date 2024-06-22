@@ -11,7 +11,7 @@ import FileDownload from "js-file-download";
 
 const App = () => {
   const [jsonData, setJsonData] = useState("");
-  const [format, setFormat] = useState("");
+  const [format, setFormat] = useState("csv");
 
   const handleJsonDataChange = (event) => {
     setJsonData(event.target.value);

@@ -13,16 +13,25 @@ const rateLimit = require("express-rate-limit");
 const cache = new Map();
 const app = express();
 const PORT = 5000;
+const limit = 15;
+const timeWindow = 15; //Minutes
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, //15 mins
-  limit: 15,
-  message:
-    "You have reached the max quota of 5 requests. Please wait for some time!",
+  windowMs: timeWindow * 60 * 1000,
+  limit: limit,
+  message: `You have reached the max quota of ${limit} requests. Please wait for ${timeWindow} minutes!`,
 });
 
 app.use(cors()); // Use cors middleware
 app.use(bodyParser.json());
 app.use(limiter);
+
+//Syntax Validation for json
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    return res.status(400).json({ error: "Check Json syntax and try again!" });
+  }
+  next();
+});
 
 app.post("/convert", async (req, res) => {
   const { data, format } = req.body;
@@ -35,7 +44,10 @@ app.post("/convert", async (req, res) => {
 
   let jsonData;
   try {
-    jsonData = JSON.parse(data);
+    if (typeof data === "string") {
+      jsonData = JSON.parse(data);
+      console.log("In String!");
+    } else jsonData = JSON.parse(JSON.stringify(data));
   } catch (error) {
     return res.status(400).send("Invalid JSON data");
   }
