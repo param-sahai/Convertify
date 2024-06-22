@@ -10,6 +10,7 @@ const axios = require("axios");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
+const cache = new Map();
 const app = express();
 const PORT = 5000;
 const limiter = rateLimit({
@@ -25,6 +26,12 @@ app.use(limiter);
 
 app.post("/convert", async (req, res) => {
   const { data, format } = req.body;
+  const cacheKey = `${data}-${format}`;
+
+  if (cache.has(cacheKey)) {
+    console.log("Using Cache for optimization");
+    return res.send(cache.get(cacheKey));
+  }
 
   let jsonData;
   try {
@@ -143,6 +150,7 @@ app.post("/convert", async (req, res) => {
       return res.status(400).send("Invalid format");
   }
 
+  cache.set(cacheKey, result);
   res.send(result);
 });
 
