@@ -16,6 +16,7 @@
     "cors": "^2.8.5",
     "exceljs": "^4.4.0",
     "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
     "js-yaml": "^4.1.0",
     "json2csv": "^6.0.0-alpha.2",
     "jstoxml": "^5.0.1",

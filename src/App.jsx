@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
-import { Container, TextField, Button, MenuItem, Typography } from '@mui/material';
-import axios from 'axios';
-import FileDownload from 'js-file-download';
+import React, { useState } from "react";
+import {
+  Container,
+  TextField,
+  Button,
+  MenuItem,
+  Typography,
+} from "@mui/material";
+import axios from "axios";
+import FileDownload from "js-file-download";
 
 const App = () => {
-  const [jsonData, setJsonData] = useState('');
-  const [format, setFormat] = useState('');
+  const [jsonData, setJsonData] = useState("");
+  const [format, setFormat] = useState("");
 
   const handleJsonDataChange = (event) => {
     setJsonData(event.target.value);
@@ -18,15 +24,23 @@ const App = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/convert', {
-        data: jsonData,
-        format: format
-      }, { responseType: 'blob' });
+      const response = await axios.post(
+        "http://localhost:5000/convert",
+        {
+          data: jsonData,
+          format: format,
+        },
+        { responseType: "blob" }
+      );
 
       FileDownload(response.data, `converted_data.${format}`);
     } catch (error) {
-      alert("Kindly check the JSON format and try again!")
-      console.error('Error converting data:', error);
+      if (error.response.status === 429) {
+        alert("Too Many Requests. Please try again later");
+      } else {
+        alert("Invalid Json!");
+        console.error("Error converting data:", error);
+      }
     }
   };
 
