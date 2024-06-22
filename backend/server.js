@@ -46,20 +46,21 @@ app.post("/convert", async (req, res) => {
   try {
     if (typeof data === "string") {
       jsonData = JSON.parse(data);
-      console.log("In String!");
     } else jsonData = JSON.parse(JSON.stringify(data));
   } catch (error) {
     return res.status(400).send("Invalid JSON data");
   }
 
   let result;
+  let fileName;
+  let contentType;
   switch (format) {
     case "csv":
       try {
         const parser = new Parser();
         result = parser.parse(jsonData);
-        res.header("Content-Type", "text/csv");
-        res.attachment("data.csv");
+        fileName = "data.csv";
+        contentType = "text/csv";
       } catch (error) {
         return res.status(500).send("Error converting to CSV");
       }
@@ -70,8 +71,8 @@ app.post("/convert", async (req, res) => {
         result = toXML(jsonData, {
           indent: "    ",
         });
-        res.header("Content-Type", "application/xml");
-        res.attachment("data.xml");
+        fileName = "data.xml";
+        contentType = "application/xml";
       } catch (error) {
         return res.status(500).send("Error converting to XML");
       }
@@ -80,8 +81,8 @@ app.post("/convert", async (req, res) => {
     case "yaml":
       try {
         result = yaml.dump(jsonData);
-        res.header("Content-Type", "application/x-yaml");
-        res.attachment("data.yaml");
+        fileName = "data.yaml";
+        contentType = "application/x-yaml";
       } catch (error) {
         return res.status(500).send("Error converting to YAML");
       }
@@ -90,15 +91,18 @@ app.post("/convert", async (req, res) => {
     case "pdf":
       try {
         const doc = new PDFDocument();
-        res.header("Content-Type", "application/pdf");
-        res.attachment("data.pdf");
+        fileName = "data.pdf";
+        contentType = "application/pdf";
+        res.header("Content-Disposition", `attachment; filename=${fileName}`);
+        res.header("Content-Type", contentType);
         doc.pipe(res);
         doc.text(JSON.stringify(jsonData, null, 2));
         doc.end();
+        return;
       } catch (error) {
         return res.status(500).send("Error converting to PDF");
       }
-      return;
+      break;
 
     case "xlsx":
       try {
@@ -107,17 +111,16 @@ app.post("/convert", async (req, res) => {
         const keys = Object.keys(jsonData[0]);
         worksheet.columns = keys.map((key) => ({ header: key, key }));
         worksheet.addRows(jsonData);
-        res.header(
-          "Content-Type",
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        );
-        res.attachment("data.xlsx");
+        fileName = "data.xlsx";
+        contentType =
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        res.header("Content-Disposition", `attachment; filename=${fileName}`);
+        res.header("Content-Type", contentType);
         await workbook.xlsx.write(res);
+        return;
       } catch (error) {
         return res.status(500).send("Error converting to Excel");
       }
-      return;
-
     /**
      *
      *
@@ -149,9 +152,12 @@ app.post("/convert", async (req, res) => {
         const buffer = canvas.toBuffer("image/png");
 
         // Send PNG buffer as response
-        res.header("Content-Type", "image/png");
-        res.attachment("data.png");
+        fileName = "data.png";
+        contentType = "image/png";
+        res.header("Content-Disposition", `attachment; filename=${fileName}`);
+        res.header("Content-Type", contentType);
         res.send(buffer);
+        return;
       } catch (error) {
         console.error("Error converting to PNG:", error);
         return res.status(500).send("Error converting to PNG");
@@ -159,9 +165,11 @@ app.post("/convert", async (req, res) => {
       break;
 
     default:
-      return res.status(400).send("Invalid format");
+      return res.status(400).send({ error: "Invalid format" });
   }
 
+  res.header("Content-Disposition", `attachment; filename=${fileName}`);
+  res.header("Content-Type", contentType);
   cache.set(cacheKey, result);
   res.send(result);
 });

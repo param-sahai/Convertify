@@ -33,7 +33,7 @@ const App = () => {
         { responseType: "blob" }
       );
 
-      FileDownload(response.data, `converted_data.${format}`);
+      FileDownload(response.data, `data.${format}`);
     } catch (error) {
       if (error.response.status === 429) {
         alert("Too Many Requests. Please try again later");
